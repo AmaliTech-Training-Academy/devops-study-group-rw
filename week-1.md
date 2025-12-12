@@ -214,5 +214,5 @@ This week focuses on mastering Bash scripting and Git/GitHub workflows. Practice
 - YouTube — Linux scripting courses: [Video](https://www.youtube.com/watch?v=PNhq_4d-5ek) • [Playlist](https://www.youtube.com/watch?v=2733cRPudvI&list=PLT98CRl2KxKGj-VKtApD8-zCqSaN2mD4w)
 - YouTube — GitHub CLI: [Video](https://www.youtube.com/watch?v=j5zUoyPaQqc)
 - YouTube — AWS CLI: [Video](https://www.youtube.com/watch?v=PWAnY-w1SGQ)
-- Interactive — Linux command game: [cmdchallenge.com](https://cmdchallenge.com)
+- Interactive — Linux command games: [cmdchallenge.com](https://cmdchallenge.com), [linuxjourney](https://labex.io/linuxjourney)
 - LLM assistants (use responsibly to learn/iterate): ChatGPT, Claude, Gemini
