@@ -156,3 +156,6 @@ This week you’ll build practical CI/CD workflows with GitHub Actions: automate
 - Official docs: [GitHub Actions](https://docs.github.com/actions) • [Workflow syntax](https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions) • [Reusable workflows](https://docs.github.com/actions/using-workflows/reusing-workflows) • [Caching](https://docs.github.com/actions/using-workflows/caching-dependencies) • [OIDC security hardening](https://docs.github.com/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect)
 - Tooling: [actionlint](https://github.com/rhysd/actionlint) (lint workflow YAML)
 - Examples: [actions/checkout](https://github.com/actions/checkout) • [actions/setup-node](https://github.com/actions/setup-node) • [aws-actions/configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials)
+- YouTube — CI/CD explained: [Video](https://www.youtube.com/watch?v=AknbizcLq4w)
+- YouTube — Fundamentals of GitHub Actions: [Video](https://www.youtube.com/watch?v=R8_veQiYBjI)
+- YouTube — Advanced GitHub Actions with Kubernetes: [Video](https://www.youtube.com/watch?v=Xwpi0ITkL3U)
