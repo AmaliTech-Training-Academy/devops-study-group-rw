@@ -31,7 +31,26 @@ sudo apt-get update
 sudo apt-get install -y containerd.io
 sudo systemctl enable --now containerd
 
-# 3. Install CNI Plugins (Crucial for Networking)
+# 3. Allow non-root access to containerd socket (ctr/nerdctl)
+CONTAINERD_GROUP="containerd"
+TARGET_USER="${SUDO_USER:-$USER}"
+
+if ! getent group "$CONTAINERD_GROUP" >/dev/null 2>&1; then
+    sudo groupadd --system "$CONTAINERD_GROUP"
+fi
+
+sudo usermod -aG "$CONTAINERD_GROUP" "$TARGET_USER"
+
+sudo mkdir -p /etc/systemd/system/containerd.service.d
+sudo tee /etc/systemd/system/containerd.service.d/10-socket-permissions.conf > /dev/null <<'EOF'
+[Service]
+ExecStartPost=/bin/sh -c 'chgrp containerd /run/containerd/containerd.sock; chmod 660 /run/containerd/containerd.sock'
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl restart containerd
+
+# 4. Install CNI Plugins (Crucial for Networking)
 echo "Downloading CNI Plugins v${CNI_VER}..."
 sudo mkdir -p /opt/cni/bin
 CNI_URL="https://github.com/containernetworking/plugins/releases/download/v${CNI_VER}/cni-plugins-linux-amd64-v${CNI_VER}.tgz"
@@ -39,16 +58,18 @@ curl -L -f -o cni-plugins.tgz "$CNI_URL"
 sudo tar -C /opt/cni/bin -xzf cni-plugins.tgz
 rm cni-plugins.tgz
 
-# 4. Install nerdctl
+# 5. Install nerdctl
 echo "Downloading nerdctl v${NERDCTL_VER}..."
 NERD_URL="https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VER}/nerdctl-${NERDCTL_VER}-linux-amd64.tar.gz"
 curl -L -f -o nerdctl.tar.gz "$NERD_URL"
 sudo tar Cxzf /usr/local/bin nerdctl.tar.gz nerdctl
 rm nerdctl.tar.gz
 
-# 5. Final Verification
+# 6. Final Verification
 echo "--------------------------------"
 echo "Containerd Status: $(systemctl is-active containerd)"
-echo "Nerdctl Version: $(nerdctl --version)"
+echo "Nerdctl Version (group test):"
+sg containerd -c "nerdctl --version" || true
+echo "Note: If the group test fails, run 'newgrp containerd' or re-login."
 echo "CNI Plugins in /opt/cni/bin:"
 ls /opt/cni/bin | grep -E 'bridge|loopback|host-local'

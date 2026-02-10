@@ -27,7 +27,28 @@ sudo apt-get update
 sudo apt-get install -y containerd.io
 sudo systemctl enable --now containerd
 
-# 3. Final Verification
+# 3. Allow non-root access to containerd socket (ctr)
+CONTAINERD_GROUP="containerd"
+TARGET_USER="${SUDO_USER:-$USER}"
+
+if ! getent group "$CONTAINERD_GROUP" >/dev/null 2>&1; then
+    sudo groupadd --system "$CONTAINERD_GROUP"
+fi
+
+sudo usermod -aG "$CONTAINERD_GROUP" "$TARGET_USER"
+
+sudo mkdir -p /etc/systemd/system/containerd.service.d
+sudo tee /etc/systemd/system/containerd.service.d/10-socket-permissions.conf > /dev/null <<'EOF'
+[Service]
+ExecStartPost=/bin/sh -c 'chgrp containerd /run/containerd/containerd.sock; chmod 660 /run/containerd/containerd.sock'
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl restart containerd
+
+# 4. Final Verification
 echo "--------------------------------"
 echo "Containerd Status: $(systemctl is-active containerd)"
-echo "ctr Version: $(ctr --version)"
+echo "ctr Version (group test):"
+sg containerd -c "ctr --version" || true
+echo "Note: If the group test fails, run 'newgrp containerd' or re-login."
