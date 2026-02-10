@@ -31,9 +31,32 @@ curl -L -f -o nerdctl.tar.gz "$NERD_URL"
 sudo tar Cxzf /usr/local/bin nerdctl.tar.gz nerdctl
 rm nerdctl.tar.gz
 
-# 3. Final Verification
+# 3. Ensure containerd group access for nerdctl
+CONTAINERD_GROUP="containerd"
+TARGET_USER="${SUDO_USER:-$USER}"
+
+if getent group "$CONTAINERD_GROUP" >/dev/null 2>&1; then
+    # Add user to containerd group if not already a member
+    if ! groups "$TARGET_USER" | grep -q "\b$CONTAINERD_GROUP\b"; then
+        sudo usermod -aG "$CONTAINERD_GROUP" "$TARGET_USER"
+        echo "Added $TARGET_USER to $CONTAINERD_GROUP group"
+    fi
+    
+    # Verify socket permissions if containerd is running
+    if [ -S /run/containerd/containerd.sock ]; then
+        sudo chgrp containerd /run/containerd/containerd.sock
+        sudo chmod 660 /run/containerd/containerd.sock
+    fi
+fi
+
+# 4. Final Verification
 echo "--------------------------------"
-echo "Nerdctl Version: $(nerdctl --version)"
+echo "Nerdctl Version (group test):"
+if getent group "$CONTAINERD_GROUP" >/dev/null 2>&1; then
+    sg containerd -c "nerdctl --version" || echo "Group access not yet active - run 'newgrp containerd' or re-login"
+else
+    echo "$(nerdctl --version) (no containerd group - may require sudo)"
+fi
 echo "CNI Plugins in /opt/cni/bin:"
 ls /opt/cni/bin | grep -E 'bridge|loopback|host-local'
 echo "Note: nerdctl requires a running containerd."

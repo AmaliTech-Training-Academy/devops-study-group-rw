@@ -52,17 +52,30 @@ wait_for_apt
 run_cmd sudo apt-get remove -y containerd.io
 run_cmd sudo apt-get autoremove -y
 
-# 3. Remove Docker repository and keyring
+# 3. Remove containerd group from user and clean up systemd drop-in
+TARGET_USER="${SUDO_USER:-$USER}"
+CONTAINERD_GROUP="containerd"
+
+if getent group "$CONTAINERD_GROUP" >/dev/null 2>&1; then
+    if groups "$TARGET_USER" | grep -q "\b$CONTAINERD_GROUP\b"; then
+        run_cmd sudo gpasswd -d "$TARGET_USER" "$CONTAINERD_GROUP"
+    fi
+fi
+
+run_cmd sudo rm -rf /etc/systemd/system/containerd.service.d
+run_cmd sudo systemctl daemon-reload
+
+# 4. Remove Docker repository and keyring
 run_cmd sudo rm -f /etc/apt/sources.list.d/docker.list
 run_cmd sudo rm -f /etc/apt/keyrings/docker.gpg
 
-# 4. Remove nerdctl binary
+# 5. Remove nerdctl binary
 run_cmd sudo rm -f /usr/local/bin/nerdctl
 
-# 5. Remove CNI plugins
+# 6. Remove CNI plugins
 run_cmd sudo rm -rf /opt/cni/bin
 
-# 6. Refresh apt metadata
+# 7. Refresh apt metadata
 wait_for_apt
 run_cmd sudo apt-get update
 

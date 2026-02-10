@@ -40,11 +40,20 @@ sudo usermod -aG "$CONTAINERD_GROUP" "$TARGET_USER"
 sudo mkdir -p /etc/systemd/system/containerd.service.d
 sudo tee /etc/systemd/system/containerd.service.d/10-socket-permissions.conf > /dev/null <<'EOF'
 [Service]
-ExecStartPost=/bin/sh -c 'chgrp containerd /run/containerd/containerd.sock; chmod 660 /run/containerd/containerd.sock'
+ExecStartPost=/bin/sh -c 'for i in 1 2 3 4 5; do [ -S /run/containerd/containerd.sock ] && break || sleep 1; done; chgrp containerd /run/containerd/containerd.sock; chmod 660 /run/containerd/containerd.sock'
 EOF
 
 sudo systemctl daemon-reload
 sudo systemctl restart containerd
+
+# Wait for socket to be ready and permissions applied
+sleep 2
+
+# Verify socket permissions
+if [ -S /run/containerd/containerd.sock ]; then
+    sudo chgrp containerd /run/containerd/containerd.sock
+    sudo chmod 660 /run/containerd/containerd.sock
+fi
 
 # 4. Final Verification
 echo "--------------------------------"
