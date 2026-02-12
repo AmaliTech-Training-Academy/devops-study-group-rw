@@ -27,7 +27,7 @@ EOF
 sudo kubeadm init --config /tmp/kubeadm-config.yaml
 
 # Setup kubeconfig
-mkdir -p $HOME/.kube
+mkdir -p $HOME/.kube/config
 sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
