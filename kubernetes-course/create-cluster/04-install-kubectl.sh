@@ -76,6 +76,9 @@ if ! dpkg -l | grep -q bash-completion; then
     apt-get install -y bash-completion
 fi
 
+# Create the directory if it doesn't exist
+mkdir -p /etc/bash_completion.d
+
 # Add kubectl completion to bashrc for all users
 kubectl completion bash | tee /etc/bash_completion.d/kubectl > /dev/null
 
